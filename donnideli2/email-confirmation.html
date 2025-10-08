@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirmación de Correo - DonniDeli</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="auth-header">
+                <a href="index.html" class="logo" style="justify-content: center; margin-bottom: 1rem;">
+                    <img src="images/logo.png" alt="DonniDeli Logo" class="logo-img">
+                </a>
+                <h1>Revisa tu Correo</h1>
+                <p>Te hemos enviado un enlace de confirmación</p>
+            </div>
+
+            <div class="alert alert-info show">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block; vertical-align: middle; margin-right: 0.5rem;">
+                    <circle cx="12" cy="12" r="10"/>
+                    <path d="M12 16v-4"/>
+                    <path d="M12 8h.01"/>
+                </svg>
+                Por favor revisa tu bandeja de entrada y haz clic en el enlace de confirmación para activar tu cuenta.
+            </div>
+
+            <div style="text-align: center; padding: 2rem 0;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--primary-color); margin-bottom: 1rem;">
+                    <rect width="20" height="16" x="2" y="4" rx="2"/>
+                    <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+                </svg>
+                <h3 style="color: var(--text-primary); margin-bottom: 0.5rem;">Correo de Confirmación Enviado</h3>
+                <p style="color: var(--text-secondary); margin-bottom: 2rem;">
+                    Si no ves el correo, revisa tu carpeta de spam.
+                </p>
+            </div>
+
+            <div id="alertMessage" class="alert"></div>
+
+            <div style="text-align: center; margin-top: 1.5rem;">
+                <p style="color: var(--text-secondary); margin-bottom: 1rem;">
+                    ¿No recibiste el correo?
+                </p>
+                <button id="resendBtn" class="btn btn-secondary">
+                    <span id="btnText">Reenviar Correo de Confirmación</span>
+                    <span id="btnSpinner" class="spinner" style="display: none; border-top-color: var(--primary-color);"></span>
+                </button>
+            </div>
+
+            <div class="form-footer">
+                <a href="signin.html">Volver a Iniciar Sesión</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Supabase Client Library -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <!-- Configuration -->
+    <script src="js/config.js"></script>
+    
+    <!-- Authentication Handler -->
+    <script src="js/auth.js"></script>
+
+    <script>
+        const resendBtn = document.getElementById('resendBtn');
+        const btnText = document.getElementById('btnText');
+        const btnSpinner = document.getElementById('btnSpinner');
+        const alertMessage = document.getElementById('alertMessage');
+
+        // Get email from URL parameter if available
+        const urlParams = new URLSearchParams(window.location.search);
+        const email = urlParams.get('email');
+
+        resendBtn.addEventListener('click', async () => {
+            if (!email) {
+                alertMessage.textContent = 'Correo no encontrado. Por favor regístrate de nuevo.';
+                alertMessage.classList.add('show', 'alert-error');
+                return;
+            }
+
+            alertMessage.classList.remove('show', 'alert-error', 'alert-success');
+            
+            // Disable button and show loading
+            resendBtn.disabled = true;
+            btnText.style.display = 'none';
+            btnSpinner.style.display = 'inline-block';
+            
+            try {
+                // Resend confirmation email using Supabase
+                const { error } = await window.supabaseClient.auth.resend({
+                    type: 'signup',
+                    email: email,
+                    options: {
+                        emailRedirectTo: window.location.origin + '/dashboard.html'
+                    }
+                });
+
+                if (error) {
+                    console.error('Error resending confirmation:', error);
+                    alertMessage.textContent = 'Error al reenviar el correo. Por favor intenta de nuevo o regístrate nuevamente.';
+                    alertMessage.classList.add('show', 'alert-error');
+                } else {
+                    alertMessage.textContent = '¡Correo de confirmación reenviado exitosamente! Revisa tu bandeja de entrada.';
+                    alertMessage.classList.add('show', 'alert-success');
+                }
+            } catch (error) {
+                console.error('Unexpected error:', error);
+                alertMessage.textContent = 'Ocurrió un error inesperado. Por favor intenta de nuevo.';
+                alertMessage.classList.add('show', 'alert-error');
+            } finally {
+                resendBtn.disabled = false;
+                btnText.style.display = 'inline';
+                btnSpinner.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>

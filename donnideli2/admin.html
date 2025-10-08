@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Administración - DonniDeli</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="logo">
+                <img src="images/logo.png" alt="DonniDeli Logo" class="logo-img">
+            </a>
+            <ul class="nav-links">
+                <li><a href="dashboard.html">Mi Panel</a></li>
+                <li><a href="admin.html">Panel Admin</a></li>
+                <li><span id="userEmail" style="color: var(--text-secondary);"></span></li>
+                <li><button id="signOutBtn" class="btn btn-danger" style="padding: 0.5rem 1rem;">Cerrar Sesión</button></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Admin Dashboard Container -->
+    <div class="dashboard-container">
+        <!-- Dashboard Header -->
+        <div class="dashboard-header">
+            <h1>Panel de Administración</h1>
+            <p>Administra las compras de los clientes y visualiza estadísticas</p>
+        </div>
+
+        <div id="alertMessage" class="alert"></div>
+
+        <!-- Client Lookup Section -->
+        <div class="purchases-section" style="margin-bottom: 2rem;">
+            <div class="section-header">
+                <h2>Buscar Cliente</h2>
+            </div>
+
+            <form id="clientLookupForm" style="margin-bottom: 2rem;">
+                <div class="form-group">
+                    <label for="searchInput" class="form-label">Buscar por Correo Electrónico o Código de Barras</label>
+                    <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                        <input 
+                            type="text" 
+                            id="searchInput" 
+                            class="form-input" 
+                            placeholder="cliente@ejemplo.com o DN1234567890"
+                            required
+                            style="flex: 1; min-width: 250px;"
+                        >
+                        <button type="submit" class="btn btn-primary" id="lookupBtn">
+                            <span id="lookupBtnText">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block; vertical-align: middle; margin-right: 0.25rem;">
+                                    <circle cx="11" cy="11" r="8"/>
+                                    <path d="m21 21-4.3-4.3"/>
+                                </svg>
+                                Buscar Cliente
+                            </span>
+                            <span id="lookupBtnSpinner" class="spinner" style="display: none;"></span>
+                        </button>
+                    </div>
+                    <small style="color: var(--text-secondary); font-size: 0.875rem; margin-top: 0.5rem; display: block;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block; vertical-align: middle; margin-right: 0.25rem;">
+                            <circle cx="12" cy="12" r="10"/>
+                            <path d="M12 16v-4"/>
+                            <path d="M12 8h.01"/>
+                        </svg>
+                        Puedes buscar usando el correo electrónico del cliente o escaneando su código de barras único
+                    </small>
+                </div>
+            </form>
+
+            <!-- Client Info Display -->
+            <div id="clientInfo" style="display: none;">
+                <div class="stats-grid" style="margin-bottom: 2rem;">
+                    <div class="stat-card">
+                        <svg class="stat-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                            <circle cx="9" cy="7" r="4"/>
+                            <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                        </svg>
+                        <div class="stat-label">Correo del Cliente</div>
+                        <div class="stat-value" id="clientEmailDisplay" style="font-size: 1.25rem; word-break: break-all;"></div>
+                    </div>
+
+                    <div class="stat-card">
+                        <svg class="stat-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M3 5v14"/>
+                            <path d="M8 5v14"/>
+                            <path d="M12 5v14"/>
+                            <path d="M17 5v14"/>
+                            <path d="M21 5v14"/>
+                        </svg>
+                        <div class="stat-label">Código de Barras</div>
+                        <div class="stat-value" id="clientBarcodeDisplay" style="font-size: 1.5rem; font-family: 'Courier New', monospace; letter-spacing: 0.1em;"></div>
+                    </div>
+
+                    <div class="stat-card">
+                        <svg class="stat-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M3 9h18v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9Z"/>
+                            <path d="m3 9 2.45-4.9A2 2 0 0 1 7.24 3h9.52a2 2 0 0 1 1.8 1.1L21 9"/>
+                            <path d="M12 3v6"/>
+                        </svg>
+                        <div class="stat-label">Total de Compras</div>
+                        <div class="stat-value" id="clientTotalPurchases">0</div>
+                    </div>
+
+                    <div class="stat-card">
+                        <svg class="stat-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="12" x2="12" y1="2" y2="22"/>
+                            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                        </svg>
+                        <div class="stat-label">Total Gastado</div>
+                        <div class="stat-value" id="clientTotalSpent">$0.00</div>
+                    </div>
+
+                    <div class="stat-card">
+                        <svg class="stat-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="12" x2="12" y1="20" y2="10"/>
+                            <line x1="18" x2="18" y1="20" y2="4"/>
+                            <line x1="6" x2="6" y1="20" y2="16"/>
+                        </svg>
+                        <div class="stat-label">Promedio por Visita</div>
+                        <div class="stat-value" id="clientAverageSpent">$0.00</div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div style="display: flex; gap: 1rem; margin-bottom: 2rem; flex-wrap: wrap;">
+                    <button id="addPurchaseBtn" class="btn btn-primary">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M5 12h14"/>
+                            <path d="M12 5v14"/>
+                        </svg>
+                        Agregar Compra para el Cliente
+                    </button>
+                    <button id="resetHistoryBtn" class="btn btn-danger" style="display: none;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M3 6h18"/>
+                            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+                            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+                        </svg>
+                        Reiniciar Historial (10+ Compras)
+                    </button>
+                </div>
+
+                <!-- Client Purchase History -->
+                <div class="section-header">
+                    <h3>Historial de Compras</h3>
+                </div>
+
+                <div id="clientPurchasesList" class="purchases-list">
+                    <!-- Purchases will be loaded here -->
+                </div>
+
+                <div id="clientEmptyState" class="empty-state" style="display: none;">
+                    <svg class="empty-state-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 9h18v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9Z"/>
+                        <path d="m3 9 2.45-4.9A2 2 0 0 1 7.24 3h9.52a2 2 0 0 1 1.8 1.1L21 9"/>
+                        <path d="M12 3v6"/>
+                    </svg>
+                    <h3>No hay compras aún</h3>
+                    <p>Este cliente no tiene historial de compras.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Purchase Modal -->
+    <div id="purchaseModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Agregar Compra para el Cliente</h2>
+                <button class="modal-close" id="closeModal">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M18 6 6 18"/>
+                        <path d="m6 6 12 12"/>
+                    </svg>
+                </button>
+            </div>
+
+            <form id="purchaseForm">
+                <div class="form-group">
+                    <label for="amount" class="form-label">Monto ($)</label>
+                    <input 
+                        type="number" 
+                        id="amount" 
+                        class="form-input" 
+                        placeholder="0.00"
+                        step="0.01"
+                        min="0"
+                        required
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="notes" class="form-label">Notas (Opcional)</label>
+                    <textarea 
+                        id="notes" 
+                        class="form-input" 
+                        placeholder="Agrega notas sobre esta compra..."
+                        rows="4"
+                        style="resize: vertical;"
+                    ></textarea>
+                </div>
+
+                <div style="display: flex; gap: 1rem;">
+                    <button type="submit" class="btn btn-primary" style="flex: 1;" id="savePurchaseBtn">
+                        <span id="saveBtnText">Guardar Compra</span>
+                        <span id="saveBtnSpinner" class="spinner" style="display: none;"></span>
+                    </button>
+                    <button type="button" class="btn btn-secondary" id="cancelBtn">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <!-- Supabase Client Library -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <!-- Configuration -->
+    <script src="js/config.js"></script>
+    
+    <!-- Authentication Handler -->
+    <script src="js/auth.js"></script>
+    
+    <!-- Admin Handler -->
+    <script src="js/admin.js"></script>
+
+    <script>
+        // Initialize admin dashboard on page load
+        window.addEventListener('DOMContentLoaded', async () => {
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            loadingOverlay.classList.add('show');
+
+            try {
+                // Check if user is authenticated
+                const user = await getCurrentUser();
+                
+                if (!user) {
+                    window.location.href = 'signin.html';
+                    return;
+                }
+
+                // Check if user is admin
+                const isAdmin = await checkIfAdmin();
+                
+                if (!isAdmin) {
+                    showAlert('Acceso denegado. Debes ser administrador para acceder a esta página.', 'error');
+                    setTimeout(() => {
+                        window.location.href = 'dashboard.html';
+                    }, 2000);
+                    return;
+                }
+
+                // Display user email
+                document.getElementById('userEmail').textContent = user.email;
+
+                // Initialize admin dashboard
+                initAdminDashboard();
+            } catch (error) {
+                console.error('Error initializing admin dashboard:', error);
+                showAlert('Error al cargar el panel de administración. Por favor recarga la página.', 'error');
+            } finally {
+                loadingOverlay.classList.remove('show');
+            }
+        });
+
+        // Sign out handler
+        document.getElementById('signOutBtn').addEventListener('click', async () => {
+            const result = await signOut();
+            if (result.success) {
+                window.location.href = 'index.html';
+            }
+        });
+    </script>
+</body>
+</html>

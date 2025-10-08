@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Control - DonniDeli</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="logo">
+                <img src="images/logo.png" alt="DonniDeli Logo" class="logo-img">
+            </a>
+            <ul class="nav-links">
+                <li id="userPanelLink"><a href="dashboard.html">Panel</a></li>
+                <li id="adminLinkContainer" style="display: none;"><a href="admin.html">Panel Admin</a></li>
+                <li><span id="userEmail" style="color: var(--text-secondary);"></span></li>
+                <li><button id="signOutBtn" class="btn btn-danger" style="padding: 0.5rem 1rem;">Cerrar Sesión</button></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Dashboard Container -->
+    <div class="dashboard-container">
+        <!-- Dashboard Header -->
+        <div class="dashboard-header">
+            <h1>Tu Panel de Control</h1>
+            <p>Rastrea y administra tus compras</p>
+        </div>
+
+        <!-- Instrucciones de Recompensa -->
+        <div class="alert alert-info show" style="margin-bottom: 2rem;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block; vertical-align: middle; margin-right: 0.5rem;">
+                <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                <path d="M2 17l10 5 10-5"/>
+                <path d="M2 12l10 5 10-5"/>
+            </svg>
+            <strong>Instrucciones:</strong> En tu décima compra obtén GRATIS una compra del mismo valor del promedio de tus compras alcanzado.
+        </div>
+
+        <!-- Barcode Display -->
+        <div id="barcodeContainer" style="display: none; background: white; border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); text-align: center;">
+            <h3 style="margin: 0 0 1rem 0; color: var(--text-primary); font-size: 1.25rem;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block; vertical-align: middle; margin-right: 0.5rem;">
+                    <path d="M3 5v14"/>
+                    <path d="M8 5v14"/>
+                    <path d="M12 5v14"/>
+                    <path d="M17 5v14"/>
+                    <path d="M21 5v14"/>
+                </svg>
+                Tu Código de Barras Único
+            </h3>
+            <div style="background: white; padding: 1.5rem; border-radius: 8px; margin-bottom: 0.5rem; border: 2px solid #e9ecef;">
+                <!-- Barcode SVG will be inserted here -->
+                <svg id="barcodeImage"></svg>
+            </div>
+            <div style="background: #f8f9fa; padding: 0.75rem; border-radius: 8px; margin-bottom: 0.5rem;">
+                <div id="userBarcode" style="font-size: 1.5rem; font-weight: bold; letter-spacing: 0.2em; color: var(--primary-color); font-family: 'Courier New', monospace;"></div>
+            </div>
+            <p style="color: var(--text-secondary); font-size: 0.875rem; margin: 0;">
+                Muestra este código al administrador para registrar tus compras más rápido
+            </p>
+        </div>
+
+        <!-- Statistics Grid -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <svg class="stat-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 9h18v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9Z"/>
+                    <path d="m3 9 2.45-4.9A2 2 0 0 1 7.24 3h9.52a2 2 0 0 1 1.8 1.1L21 9"/>
+                    <path d="M12 3v6"/>
+                </svg>
+                <div class="stat-label">Total de Compras</div>
+                <div class="stat-value" id="totalPurchases">0</div>
+            </div>
+
+            <div class="stat-card">
+                <svg class="stat-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" x2="12" y1="2" y2="22"/>
+                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                </svg>
+                <div class="stat-label">Total Gastado</div>
+                <div class="stat-value" id="totalSpent">$0.00</div>
+            </div>
+
+            <div class="stat-card">
+                <svg class="stat-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" x2="12" y1="20" y2="10"/>
+                    <line x1="18" x2="18" y1="20" y2="4"/>
+                    <line x1="6" x2="6" y1="20" y2="16"/>
+                </svg>
+                <div class="stat-label">Promedio por Visita</div>
+                <div class="stat-value" id="averageSpent">$0.00</div>
+            </div>
+        </div>
+
+        <!-- Purchases Section -->
+        <div class="purchases-section">
+            <div class="section-header">
+                <h2>Historial de Compras</h2>
+                <!-- Botón de agregar compra REMOVIDO para usuarios normales -->
+            </div>
+
+            <div id="alertMessage" class="alert"></div>
+
+            <div id="purchasesList" class="purchases-list">
+                <!-- Purchases will be loaded here -->
+            </div>
+
+            <div id="emptyState" class="empty-state" style="display: none;">
+                <svg class="empty-state-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 9h18v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9Z"/>
+                    <path d="m3 9 2.45-4.9A2 2 0 0 1 7.24 3h9.52a2 2 0 0 1 1.8 1.1L21 9"/>
+                    <path d="M12 3v6"/>
+                </svg>
+                <h3>No hay compras aún</h3>
+                <p>Tus compras aparecerán aquí cuando el administrador las registre.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <!-- Supabase Client Library -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <!-- JsBarcode Library for generating barcodes -->
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+    
+    <!-- Configuration -->
+    <script src="js/config.js"></script>
+    
+    <!-- Authentication Handler -->
+    <script src="js/auth.js"></script>
+    
+    <!-- Admin Handler -->
+    <script src="js/admin.js"></script>
+    
+    <!-- Dashboard Handler -->
+    <script src="js/dashboard.js"></script>
+
+    <script>
+        // Initialize dashboard on page load
+        window.addEventListener('DOMContentLoaded', async () => {
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            loadingOverlay.classList.add('show');
+
+            try {
+                // Check if user is authenticated
+                const user = await getCurrentUser();
+                
+                if (!user) {
+                    window.location.href = 'signin.html';
+                    return;
+                }
+
+                // Display user email
+                document.getElementById('userEmail').textContent = user.email;
+
+                // Check if user is admin and adjust navigation
+                const isAdmin = await checkIfAdmin();
+                if (isAdmin) {
+                    // Si es admin, ocultar "Panel" y mostrar "Panel Admin"
+                    document.getElementById('userPanelLink').style.display = 'none';
+                    document.getElementById('adminLinkContainer').style.display = 'block';
+                    
+                    // Redirigir al panel admin automáticamente
+                    window.location.href = 'admin.html';
+                    return;
+                } else {
+                    // Si es usuario normal, mostrar "Panel" y ocultar "Panel Admin"
+                    document.getElementById('userPanelLink').style.display = 'block';
+                    document.getElementById('adminLinkContainer').style.display = 'none';
+                }
+
+                // Initialize dashboard
+                await initDashboard();
+            } catch (error) {
+                console.error('Error initializing dashboard:', error);
+                showAlert('Error al cargar el panel. Por favor recarga la página.', 'error');
+            } finally {
+                loadingOverlay.classList.remove('show');
+            }
+        });
+
+        // Sign out handler
+        document.getElementById('signOutBtn').addEventListener('click', async () => {
+            const result = await signOut();
+            if (result.success) {
+                window.location.href = 'index.html';
+            }
+        });
+    </script>
+</body>
+</html>
