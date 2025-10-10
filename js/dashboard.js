@@ -200,7 +200,6 @@ function updateStatistics(purchases) {
     const averageSpent = totalPurchases > 0 ? totalSpent / totalPurchases : 0;
 
     document.getElementById('totalPurchases').textContent = totalPurchases;
-    document.getElementById('totalSpent').textContent = `$${totalSpent.toFixed(2)}`;
     document.getElementById('averageSpent').textContent = `$${averageSpent.toFixed(2)}`;
 }
 
@@ -397,6 +396,7 @@ if (typeof window !== 'undefined') {
     window.dashboardFunctions = {
         initDashboard,
         loadPurchases,
+        createInitialVisits,
         savePurchase,
         editPurchase,
         deletePurchase,
