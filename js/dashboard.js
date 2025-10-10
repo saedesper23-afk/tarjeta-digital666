@@ -64,38 +64,121 @@ function displayBarcode(barcode) {
         }
     }
 }
-
 /**
- * Setup event listeners for dashboard interactions
+ * Create initial visits for a user if they don't have any purchases
+ * @param {string} userId - User's ID
+ * @returns {Promise<boolean>} True if initial visits were created
  */
-function setupEventListeners() {
-    const addPurchaseBtn = document.getElementById('addPurchaseBtn');
-    const purchaseModal = document.getElementById('purchaseModal');
-    const closeModal = document.getElementById('closeModal');
-    const cancelBtn = document.getElementById('cancelBtn');
-    const purchaseForm = document.getElementById('purchaseForm');
+async function createInitialVisits(userId) {
+    try {
+        const initialVisits = [
+            {
+                user_id: userId,
+                amount: 100.00,
+                notes: '¡Las primeras dos van por nuestra cuenta!',
+                purchase_date: new Date().toISOString(),
+                added_by_admin_id: null,
+                added_by_admin_email: 'Sistema'
+            },
+            {
+                user_id: userId,
+                amount: 100.00,
+                notes: '¡Las primeras dos van por nuestra cuenta!',
+                purchase_date: new Date().toISOString(),
+                added_by_admin_id: null,
+                added_by_admin_email: 'Sistema'
+            }
+        ];
 
-    // Open modal to add new purchase
-    addPurchaseBtn.addEventListener('click', () => {
-        currentEditingPurchaseId = null;
-        document.getElementById('modalTitle').textContent = 'Add Purchase';
-        document.getElementById('saveBtnText').textContent = 'Save Purchase';
-        purchaseForm.reset();
-        purchaseModal.classList.add('show');
-    });
+        const { error } = await window.supabaseClient
+            .from('purchases')
+            .insert(initialVisits);
 
-    // Close modal
-    closeModal.addEventListener('click', () => {
-        purchaseModal.classList.remove('show');
-    });
+        if (error) {
+            console.error('Error creating initial visits:', error);
+            return false;
+        }
 
-    cancelBtn.addEventListener('click', () => {
-        purchaseModal.classList.remove('show');
-    });
+        console.log('Initial visits created successfully');
+        return true;
+    } catch (error) {
+        console.error('Unexpected error creating initial visits:', error);
+        return false;
+    }
+}
+/**
+/**
+ * Load all purchases for the current user
+ */
+async function loadPurchases() {
+    try {
+        const user = await getCurrentUser();
+        if (!user) {
+            window.location.href = 'signin.html';
+            return;
+        }
 
-    // Close modal when clicking outside
-    purchaseModal.addEventListener('click', (e) => {
-        if (e.target === purchaseModal) {
+        const { data: purchases, error } = await window.supabaseClient
+            .from('purchases')
+            .select('*')
+            .eq('user_id', user.id)
+            .order('purchase_date', { ascending: false });
+
+        if (error) {
+            console.error('Error loading purchases:', error);
+            showAlert('Failed to load purchases. Please refresh the page.', 'error');
+            return;
+        }
+
+        // If user has no purchases, create the two initial visits automatically
+        if (!purchases || purchases.length === 0) {
+            console.log('No purchases found. Creating initial visits...');
+            const created = await createInitialVisits(user.id);
+            
+            if (created) {
+                // Reload purchases after creating initial visits
+                const { data: newPurchases, error: reloadError } = await window.supabaseClient
+                    .from('purchases')
+                    .select('*')
+                    .eq('user_id', user.id)
+                    .order('purchase_date', { ascending: false });
+
+                if (!reloadError && newPurchases) {
+                    displayPurchases(newPurchases);
+                    updateStatistics(newPurchases);
+                    return;
+                }
+            }
+        }
+
+        displayPurchases(purchases || []);
+        updateStatistics(purchases || []);
+    } catch (error) {
+        console.error('Unexpected error loading purchases:', error);
+        showAlert('An unexpected error occurred while loading purchases.', 'error');
+    }
+}               // Reload purchases after creating initial visits
+                const { data: newPurchases, error: reloadError } = await window.supabaseClient
+                    .from('purchases')
+                    .select('*')
+                    .eq('user_id', user.id)
+                    .order('purchase_date', { ascending: false });
+
+                if (!reloadError && newPurchases) {
+                    displayPurchases(newPurchases);
+                    updateStatistics(newPurchases);
+                    return;
+                }
+            }
+        }
+
+        displayPurchases(purchases || []);
+        updateStatistics(purchases || []);
+    } catch (error) {
+        console.error('Unexpected error loading purchases:', error);
+        showAlert('An unexpected error occurred while loading purchases.', 'error');
+    }
+}       if (e.target === purchaseModal) {
             purchaseModal.classList.remove('show');
         }
     });
@@ -402,4 +485,4 @@ if (typeof window !== 'undefined') {
         deletePurchase,
         showAlert
     };
-}
+}x
