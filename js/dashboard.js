@@ -106,7 +106,58 @@ async function createInitialVisits(userId) {
         return false;
     }
 }
+
 /**
+ * Setup event listeners for dashboard interactions
+ */
+function setupEventListeners() {
+    const addPurchaseBtn = document.getElementById('addPurchaseBtn');
+    const purchaseModal = document.getElementById('purchaseModal');
+    const closeModal = document.getElementById('closeModal');
+    const cancelBtn = document.getElementById('cancelBtn');
+    const purchaseForm = document.getElementById('purchaseForm');
+
+    // Open modal to add new purchase
+    if (addPurchaseBtn) {
+        addPurchaseBtn.addEventListener('click', () => {
+            currentEditingPurchaseId = null;
+            document.getElementById('modalTitle').textContent = 'Add Purchase';
+            document.getElementById('saveBtnText').textContent = 'Save Purchase';
+            purchaseForm.reset();
+            purchaseModal.classList.add('show');
+        });
+    }
+
+    // Close modal
+    if (closeModal) {
+        closeModal.addEventListener('click', () => {
+            purchaseModal.classList.remove('show');
+        });
+    }
+
+    if (cancelBtn) {
+        cancelBtn.addEventListener('click', () => {
+            purchaseModal.classList.remove('show');
+        });
+    }
+
+    // Close modal when clicking outside
+    if (purchaseModal) {
+        purchaseModal.addEventListener('click', (e) => {
+            if (e.target === purchaseModal) {
+                purchaseModal.classList.remove('show');
+            }
+        });
+    }
+
+    // Handle form submission
+    if (purchaseForm) {
+        purchaseForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            await savePurchase();
+        });
+    }
+}
 /**
  * Load all purchases for the current user
  */
@@ -149,68 +200,6 @@ async function loadPurchases() {
                     return;
                 }
             }
-        }
-
-        displayPurchases(purchases || []);
-        updateStatistics(purchases || []);
-    } catch (error) {
-        console.error('Unexpected error loading purchases:', error);
-        showAlert('An unexpected error occurred while loading purchases.', 'error');
-    }
-}               // Reload purchases after creating initial visits
-                const { data: newPurchases, error: reloadError } = await window.supabaseClient
-                    .from('purchases')
-                    .select('*')
-                    .eq('user_id', user.id)
-                    .order('purchase_date', { ascending: false });
-
-                if (!reloadError && newPurchases) {
-                    displayPurchases(newPurchases);
-                    updateStatistics(newPurchases);
-                    return;
-                }
-            }
-        }
-
-        displayPurchases(purchases || []);
-        updateStatistics(purchases || []);
-    } catch (error) {
-        console.error('Unexpected error loading purchases:', error);
-        showAlert('An unexpected error occurred while loading purchases.', 'error');
-    }
-}       if (e.target === purchaseModal) {
-            purchaseModal.classList.remove('show');
-        }
-    });
-
-    // Handle form submission
-    purchaseForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        await savePurchase();
-    });
-}
-
-/**
- * Load all purchases for the current user
- */
-async function loadPurchases() {
-    try {
-        const user = await getCurrentUser();
-        if (!user) {
-            window.location.href = 'signin.html';
-            return;
-        }
-
-        const { data: purchases, error } = await window.supabaseClient
-            .from('purchases')
-            .select('*')
-            .eq('user_id', user.id)
-            .order('purchase_date', { ascending: false });
-
-        if (error) {
-            console.error('Error loading purchases:', error);
-            showAlert('Failed to load purchases. Please refresh the page.', 'error');
-            return;
         }
 
         displayPurchases(purchases || []);
@@ -485,4 +474,4 @@ if (typeof window !== 'undefined') {
         deletePurchase,
         showAlert
     };
-}x
+}
