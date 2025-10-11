@@ -373,22 +373,52 @@ async function resetClientHistory() {
     }
 
     try {
-        const { error } = await window.supabaseClient
+        // Delete all purchases
+        const { error: deleteError } = await window.supabaseClient
             .from('purchases')
             .delete()
             .eq('user_id', currentClientUserId);
 
-        if (error) {
-            console.error('Error resetting history:', error);
+        if (deleteError) {
+            console.error('Error resetting history:', deleteError);
             showAlert('Error al reiniciar el historial. Por favor intenta de nuevo.', 'error');
             return;
         }
 
-        showAlert('¡Historial reiniciado exitosamente!', 'success');
+        // Create the two initial visits automatically
+        const initialVisits = [
+            {
+                user_id: currentClientUserId,
+                amount: 100.00,
+                notes: '¡Las primeras dos van por nuestra cuenta!',
+                purchase_date: new Date().toISOString(),
+                added_by_admin_id: null,
+                added_by_admin_email: 'Sistema'
+            },
+            {
+                user_id: currentClientUserId,
+                amount: 100.00,
+                notes: '¡Las primeras dos van por nuestra cuenta!',
+                purchase_date: new Date().toISOString(),
+                added_by_admin_id: null,
+                added_by_admin_email: 'Sistema'
+            }
+        ];
+
+        const { error: insertError } = await window.supabaseClient
+            .from('purchases')
+            .insert(initialVisits);
+
+        if (insertError) {
+            console.error('Error creating initial visits:', insertError);
+            showAlert('Historial reiniciado pero hubo un error al crear las visitas iniciales.', 'error');
+        } else {
+            showAlert('¡Historial reiniciado exitosamente con las dos visitas iniciales!', 'success');
+        }
         
-        // Refresh client data
-        document.getElementById('searchInput').value = currentClientEmail;
-        await lookupClient();
+                // Refresh client data
+                document.getElementById('searchInput').value = currentClientEmail;
+                await lookupClient();
     } catch (error) {
         console.error('Unexpected error resetting history:', error);
         showAlert('Ocurrió un error inesperado al reiniciar el historial.', 'error');
