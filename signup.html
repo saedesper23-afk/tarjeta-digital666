@@ -31,7 +31,20 @@
                     >
                     <div id="emailError" class="form-error"></div>
                 </div>
-
+                <div class="form-group">
+                    <label for="confirmEmail" class="form-label">Confirmar Correo Electrónico</label>
+                    <input 
+                        type="email" 
+                        id="confirmEmail" 
+                        class="form-input" 
+                        placeholder="tu@ejemplo.com"
+                        required
+                    >
+                    <div id="confirmEmailError" class="form-error"></div>
+                    <small style="color: var(--text-secondary); font-size: 0.875rem;">
+                        Asegúrate de escribir correctamente tu correo
+                    </small>
+                </div>
                 <div class="form-group">
                     <label for="password" class="form-label">Contraseña</label>
                     <div style="position: relative;">
@@ -112,6 +125,7 @@
     <script>
         const signupForm = document.getElementById('signupForm');
         const emailInput = document.getElementById('email');
+        const confirmEmailInput = document.getElementById('confirmEmail');
         const passwordInput = document.getElementById('password');
         const confirmPasswordInput = document.getElementById('confirmPassword');
         const signupBtn = document.getElementById('signupBtn');
@@ -170,8 +184,17 @@ toggleConfirmPasswordBtn.addEventListener('mouseout', () => {
             alertMessage.classList.remove('show', 'alert-error', 'alert-success');
             
             const email = emailInput.value.trim();
+          const confirmEmail = confirmEmailInput.value.trim();
+
+// Validate emails match
+if (email !== confirmEmail) {
+    document.getElementById('confirmEmailError').textContent = 'Los correos electrónicos no coinciden';
+    document.getElementById('confirmEmailError').classList.add('show');
+    return;
+}
             const password = passwordInput.value;
             const confirmPassword = confirmPasswordInput.value;
+          
             
             // Validate passwords match
             if (password !== confirmPassword) {
@@ -189,14 +212,12 @@ toggleConfirmPasswordBtn.addEventListener('mouseout', () => {
                 const result = await signUp(email, password);
                 
                 if (result.success) {
-                    alertMessage.textContent = '¡Cuenta creada! Por favor revisa tu correo para confirmar tu cuenta.';
-                    alertMessage.classList.add('show', 'alert-success');
-                    
-                    // Redirect to email confirmation page with email parameter after 2 seconds
-                    setTimeout(() => {
-                        window.location.href = `email-confirmation.html?email=${encodeURIComponent(email)}`;
-                    }, 2000);
-                    
+                    alertMessage.textContent = '¡Cuenta creada exitosamente! Redirigiendo al dashboard...';
+alertMessage.classList.add('show', 'alert-success');
+// Redirect to dashboard after successful signup
+setTimeout(() => {
+    window.location.href = 'dashboard.html';
+}, 1500);
                     signupForm.reset();
                 } else {
                     alertMessage.textContent = result.error || 'Error al crear la cuenta. Por favor intenta de nuevo.';
