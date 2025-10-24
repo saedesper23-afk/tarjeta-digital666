@@ -64,6 +64,48 @@ function displayBarcode(barcode) {
         }
     }
 }
+/**
+ * Create initial visits for a user if they don't have any purchases
+ * @param {string} userId - User's ID
+ * @returns {Promise<boolean>} True if initial visits were created
+ */
+async function createInitialVisits(userId) {
+    try {
+        const initialVisits = [
+            {
+                user_id: userId,
+                amount: 100.00,
+                notes: '¡Las primeras dos van por nuestra cuenta!',
+                purchase_date: new Date().toISOString(),
+                added_by_admin_id: null,
+                added_by_admin_email: 'Sistema'
+            },
+            {
+                user_id: userId,
+                amount: 100.00,
+                notes: '¡Las primeras dos van por nuestra cuenta!',
+                purchase_date: new Date().toISOString(),
+                added_by_admin_id: null,
+                added_by_admin_email: 'Sistema'
+            }
+        ];
+
+        const { error } = await window.supabaseClient
+            .from('purchases')
+            .insert(initialVisits);
+
+        if (error) {
+            console.error('Error creating initial visits:', error);
+            return false;
+        }
+
+        console.log('Initial visits created successfully');
+        return true;
+    } catch (error) {
+        console.error('Unexpected error creating initial visits:', error);
+        return false;
+    }
+}
 
 /**
  * Setup event listeners for dashboard interactions
@@ -139,7 +181,27 @@ async function loadPurchases() {
             return;
         }
 
-        // Display purchases (even if empty)
+        // If user has no purchases, create the two initial visits automatically
+        if (!purchases || purchases.length === 0) {
+            console.log('No purchases found. Creating initial visits...');
+            const created = await createInitialVisits(user.id);
+            
+            if (created) {
+                // Reload purchases after creating initial visits
+                const { data: newPurchases, error: reloadError } = await window.supabaseClient
+                    .from('purchases')
+                    .select('*')
+                    .eq('user_id', user.id)
+                    .order('purchase_date', { ascending: false });
+
+                if (!reloadError && newPurchases) {
+                    displayPurchases(newPurchases);
+                    updateStatistics(newPurchases);
+                    return;
+                }
+            }
+        }
+
         displayPurchases(purchases || []);
         updateStatistics(purchases || []);
     } catch (error) {
@@ -406,6 +468,7 @@ if (typeof window !== 'undefined') {
     window.dashboardFunctions = {
         initDashboard,
         loadPurchases,
+        createInitialVisits,
         savePurchase,
         editPurchase,
         deletePurchase,
