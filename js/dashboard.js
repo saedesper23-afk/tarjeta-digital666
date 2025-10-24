@@ -71,6 +71,8 @@ function displayBarcode(barcode) {
  */
 async function createInitialVisits(userId) {
     try {
+        console.log('🎁 Creating initial visits for user:', userId);
+        
         const initialVisits = [
             {
                 user_id: userId,
@@ -90,19 +92,24 @@ async function createInitialVisits(userId) {
             }
         ];
 
-        const { error } = await window.supabaseClient
+        console.log('📝 Initial visits data:', initialVisits);
+
+        const { data, error } = await window.supabaseClient
             .from('purchases')
-            .insert(initialVisits);
+            .insert(initialVisits)
+            .select();
 
         if (error) {
-            console.error('Error creating initial visits:', error);
+            console.error('❌ Error creating initial visits:', error);
+            console.error('Error details:', JSON.stringify(error, null, 2));
             return false;
         }
 
-        console.log('Initial visits created successfully');
+        console.log('✅ Initial visits created successfully:', data);
         return true;
     } catch (error) {
-        console.error('Unexpected error creating initial visits:', error);
+        console.error('❌ Unexpected error creating initial visits:', error);
+        console.error('Error stack:', error.stack);
         return false;
     }
 }
@@ -163,11 +170,15 @@ function setupEventListeners() {
  */
 async function loadPurchases() {
     try {
+        console.log('🔄 Loading purchases...');
         const user = await getCurrentUser();
         if (!user) {
+            console.log('❌ No user found, redirecting to signin');
             window.location.href = 'signin.html';
             return;
         }
+
+        console.log('✅ User found:', user.id);
 
         const { data: purchases, error } = await window.supabaseClient
             .from('purchases')
@@ -176,17 +187,20 @@ async function loadPurchases() {
             .order('purchase_date', { ascending: false });
 
         if (error) {
-            console.error('Error loading purchases:', error);
+            console.error('❌ Error loading purchases:', error);
             showAlert('Failed to load purchases. Please refresh the page.', 'error');
             return;
         }
 
+        console.log('📊 Purchases loaded:', purchases ? purchases.length : 0);
+
         // If user has no purchases, create the two initial visits automatically
         if (!purchases || purchases.length === 0) {
-            console.log('No purchases found. Creating initial visits...');
+            console.log('🎁 No purchases found. Creating initial visits...');
             const created = await createInitialVisits(user.id);
             
             if (created) {
+                console.log('✅ Initial visits created successfully');
                 // Reload purchases after creating initial visits
                 const { data: newPurchases, error: reloadError } = await window.supabaseClient
                     .from('purchases')
@@ -195,17 +209,22 @@ async function loadPurchases() {
                     .order('purchase_date', { ascending: false });
 
                 if (!reloadError && newPurchases) {
+                    console.log('✅ Reloaded purchases:', newPurchases.length);
                     displayPurchases(newPurchases);
                     updateStatistics(newPurchases);
                     return;
+                } else {
+                    console.error('❌ Error reloading purchases:', reloadError);
                 }
+            } else {
+                console.error('❌ Failed to create initial visits');
             }
         }
 
         displayPurchases(purchases || []);
         updateStatistics(purchases || []);
     } catch (error) {
-        console.error('Unexpected error loading purchases:', error);
+        console.error('❌ Unexpected error loading purchases:', error);
         showAlert('An unexpected error occurred while loading purchases.', 'error');
     }
 }
