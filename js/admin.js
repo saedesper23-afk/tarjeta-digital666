@@ -417,8 +417,8 @@ async function resetClientHistory() {
         }
         
                 // Refresh client data
-                document.getElementById('searchInput').value = currentClientEmail;
-                await lookupClient();
+        document.getElementById('searchInput').value = currentClientEmail;
+        await lookupClient();
     } catch (error) {
         console.error('Unexpected error resetting history:', error);
         showAlert('Ocurrió un error inesperado al reiniciar el historial.', 'error');
