@@ -28,10 +28,15 @@ A beautiful web application for tracking customer purchases with user authentica
    - Create a new project
    - Copy your Project URL and Anon Key
 
-2. **Configure Environment Variables**
-   - Open the `.env` file
-   - Replace `https://puzofatutnflclickbbr.supabase.co` with your Supabase Project URL
-   - Replace `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1em9mYXR1dG5mbGNsaWNrYmJyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk2MzMwODIsImV4cCI6MjA3NTIwOTA4Mn0.e1fl9CZbUDx_0ZTGB7yrVNNIjIk-N0a4JcqioAXUGeI` with your Supabase Anon Key
+2. **Configure Supabase Credentials**
+   - Open `js/config.js`
+   - Replace `YOUR_SUPABASE_PROJECT_URL` with your actual Supabase Project URL
+   - Replace `YOUR_SUPABASE_ANON_KEY` with your actual Supabase Anon Key
+   - Example:
+     ```javascript
+     const SUPABASE_URL = 'https://your-project.supabase.co';
+     const SUPABASE_ANON_KEY = 'your-anon-key-here';
+     ```
 
 3. **Set Up Database Tables**
    Run the following SQL in your Supabase SQL Editor:
@@ -129,8 +134,20 @@ donnideli2/
 - Supabase (Backend & Authentication)
 - Lucide Icons (via CDN)
 
+## Adding Your Logo (Optional)
+
+The project uses text placeholders for the logo. To add your own logo:
+
+1. Add your logo images to the `images/` folder:
+   - `logo.png` - For navigation bar (recommended size: 150x50px)
+   - `logo-hero.png` - For homepage hero section (recommended size: 200x200px)
+
+2. Update the HTML files to use your logo images instead of the text placeholders
+
 ## Security Notes
 
-- Never commit your `.env` file with real credentials
-- The Supabase Anon Key is safe to use in client-side code
+- **IMPORTANT**: Never commit `js/config.js` with real credentials to a public repository
+- Keep your Supabase credentials private
+- The Supabase Anon Key is safe to use in client-side code when combined with RLS
 - Row Level Security (RLS) policies protect user data
+- Consider using environment variables for production deployments

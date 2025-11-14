@@ -1,9 +1,15 @@
-# Environment variables
+# Environment variables and configuration
 .env
+.env.local
+.env.production
+
+# Configuration files with credentials (IMPORTANT: Keep js/config.js out of version control if it contains real credentials)
+# Uncomment the line below if you add your real credentials to config.js:
+# js/config.js
 
 # OS files
 .DS_Store
-Thumbs.db
+Thums.db
 
 # Editor files
 .vscode/
@@ -11,3 +17,12 @@ Thumbs.db
 *.swp
 *.swo
 *~
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# Temporary files
+*.tmp
+*.temp
