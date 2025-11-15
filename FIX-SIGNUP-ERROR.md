@@ -12,7 +12,7 @@ The automatic barcode generation trigger hasn't been properly set up in your Sup
 
 1. **Open Supabase Dashboard**
    - Go to https://app.supabase.com
-   - Select your project: `puzofatutnflclickbbr`
+   - Select your project
 
 2. **Open SQL Editor**
    - Click on "SQL Editor" in the left sidebar
@@ -37,7 +37,7 @@ After running the script, you'll see verification results at the bottom showing:
 
 ### Step 3: Test User Registration
 
-1. Go back to your signup page: http://donnideli.com/signup.html (or your local URL)
+1. Go back to your signup page (e.g., http://localhost:8000/signup.html or your deployed URL)
 2. Try creating a new account with a test email
 3. You should now be able to register successfully!
 
